@@ -1,14 +1,14 @@
 from machine import Pin, PWM
 
 class MotorDriver:
-    def __init__(self, pwm_pin, in1_pin, in2_pin):
+    def __init__(self, pwm_pin, in1_pin, in2_pin, enc_a_pin, enc_b_pin):
         # Motor PWM & Direction setup
         self.pwm = PWM(Pin(pwm_pin))
         self.in1 = Pin(in1_pin, Pin.OUT)
         self.in2 = Pin(in2_pin, Pin.OUT)
         self.pwm.freq(1000)
 
-        self.enc_b_pin = Pin(enc_b_pin, PinIN, Pin.PULL_UP)
+        self.enc_b_pin = Pin(enc_b_pin, Pin.IN, Pin.PULL_UP)
         self.encoder_count = 0
 
         self.enc_a = Pin(enc_a_pin, Pin.IN, Pin.PULL_UP)
