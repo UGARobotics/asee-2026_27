@@ -20,13 +20,13 @@ def main():
     test_speed = 32768
 
     try: 
-        dt.tank_drive(test_speed, test_speed)  # Drive forward at half speed
+        drivetrain.tank_drive(test_speed, test_speed)  # Drive forward at half speed
         time.sleep(2)  # Drive for 2 seconds
-        dt.stop()  # Stop the robot
+        drivetrain.stop()  # Stop the robot
 
     except KeyboardInterrupt:
         print("KeyboardInterrupt received. Stopping the robot.")
-        dt.stop()  # Ensure the robot stops if interrupted
+        drivetrain.stop()  # Ensure the robot stops if interrupted
 
 if __name__ == "__main__":
     main()
