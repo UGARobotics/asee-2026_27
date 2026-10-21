@@ -35,10 +35,10 @@ class motor:
         # initializes the encoder counter.
         self.enc_counter = enc_counter
 
-        # initializes the circumference of the motor.
+        # initializes the circumference of the wheel.
         self.circumference = circumference
         
-        # initializes the number of pulses per revolution of the motor.
+        # initializes the maximum speed of the motor. This value is used to scale the speed input to the PWM duty cycle.
         self.max_speed = max_speed
 
         # initializes the number of pulses per revolution of the motor. This value is used to calculate the number of pulses needed to move a certain distance.
@@ -77,10 +77,10 @@ class motor:
         else:
             self.enc_counter -= 1
 
-    # mag speed is from 0 to max_speed, and distance is in meters.
+    # mag speed is from 0 to max_speed, and distance is in meters. Distance can be negative to move in the opposite direction.
     def move_distance(self, distance, mag_speed):
         # This function moves the motor a specified distance in meters.
-        # It calculates the number of pulses required to move the specified distance based on the circumference of the motor and the number of pulses per revolution.
+        # It calculates the number of pulses required to move the specified distance based on the circumference of the wheel and the number of pulses per revolution.
         pulses_needed = int((distance / self.circumference) * self.pulses_per_revolution)
         self.enc_counter = 0  # Reset encoder counters
 
