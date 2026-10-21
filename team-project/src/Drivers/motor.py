@@ -72,7 +72,7 @@ class motor:
     def encoder_callback(self, pin):
         # This function is called whenever the encoder detects a change in position.
         # It updates the encoder counter based on the direction of rotation.
-        if self.enc_phase2.value() == 0:
+        if self.enc_phase2.value() == 1:
             self.enc_counter += 1
         else:
             self.enc_counter -= 1
