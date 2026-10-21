@@ -1,0 +1,23 @@
+{
+    "drivetrain": {
+        "Drive_Motor_Left": {
+        "Max_Speed": 0,
+        "Wheel_Circumference": 0,
+        "Motor_1_Pin_1": 0,
+        "Motor_1_Pin_2": 0,
+        "enc_Phase1": 0,
+        "enc_Phase2": 0,
+        "Motor_1_Sleep": 0
+        },
+        "Drive_Motor_Right": {
+        "Max_Speed": 0,
+        "Wheel_Circumference": 0,
+        "Motor_1_Pin_1": 0,
+        "Motor_1_Pin_2": 0,
+        "enc_Phase1": 0,
+        "enc_Phase2": 0,
+        "Motor_1_Sleep": 0
+        }
+    }
+    
+}
