@@ -77,6 +77,10 @@ class motor:
         else:
             self.enc_counter -= 1
 
+    # returns the current value of the encoder counter. This value represents the number of pulses detected by the encoder since the last reset. It can be used to determine the position or distance traveled by the motor.
+    def get_encoder_count(self):
+        return self.enc_counter
+
     # mag speed is from 0 to max_speed, and distance is in meters. Distance can be negative to move in the opposite direction.
     def move_distance(self, distance, mag_speed):
         # This function moves the motor a specified distance in meters.
@@ -96,7 +100,7 @@ class motor:
         # if this is terminated, the motor will stop and the encoder interrupt will be disabled.
         try:
             # Move the motor until the desired number of pulses is reached.
-            while abs(self.enc_counter) < abs(pulses_needed):
+            while abs(self.get_encoder_count()) < abs(pulses_needed):
                 yield # This allows other tasks to run while waiting for the motor to reach the desired distance.
         finally:
             # Once the desired distance is reached, disable the encoder interrupt and stop the motor.
