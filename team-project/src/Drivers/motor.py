@@ -1,9 +1,9 @@
-from machine import Pin, PWM
+import board
+import pwmio
+import digitalio
+import rotaryio
 
 class motor:
-    # defines the pins for the motor driver and encoder.
-    # One full rotation is 224.4 pulses (see motor specs).
-    # all of this values are going to be in config.py, but for now, they are hardcoded here.
     def __init__(
         self, 
         pin1, 
@@ -15,25 +15,22 @@ class motor:
         max_speed,
         pulses_per_revolution=224.4,
         freq=20000,
-        enc_counter=0
     ):
         # initializes the motor driver with frequency.
         self.freq = freq
         
         # initializes the motor driver with the specified pins and frequency.
         # freq is 20000 Hz by default, which is a common frequency for PWM control of motors.
-        self.pin_1 = PWM(Pin(pin1), freq=freq)
-        self.pin_2 = PWM(Pin(pin2), freq=freq)
+        self.pin_1 = pwmio.PWMOut(pin1, frequency=freq)
+        self.pin_2 = pwmio.PWMOut(pin2, frequency=freq)
         
         # initializes the encoder pins.
-        self.enc_phase1 = Pin(enc_phase1, Pin.IN)
-        self.enc_phase2 = Pin(enc_phase2, Pin.IN)
+        self.encoder = rotaryio.IncrementalEncoder(enc_phase2, enc_phase1)
+        self.encoder.divisor = 1  # Set the encoder divider to 1 for full resolution
         
         # initializes the sleep pin.
-        self.sleep = Pin(sleep, Pin.OUT)
-        
-        # initializes the encoder counter.
-        self.enc_counter = enc_counter
+        self.sleep = digitalio.DigitalInOut(sleep)
+        self.sleep.direction = digitalio.Direction.OUTPUT
 
         # initializes the circumference of the wheel.
         self.circumference = circumference
@@ -44,65 +41,53 @@ class motor:
         # initializes the number of pulses per revolution of the motor. This value is used to calculate the number of pulses needed to move a certain distance.
         self.pulses_per_revolution = pulses_per_revolution
 
-    # speed is from -max_speed to max_speed
-    # realistically, this is only called directly to stop the motor.
-    # most of the time, the motor is controlled by move_distance, which uses the encoder to determine when to stop.
-    # in metric units.
     def set_speed(self, speed):
         # sets the speed of the motor. The speed parameter should be a float between -negative max_speed and positive max_speed. A positive speed value will rotate the motor in one direction, while a negative speed value will rotate it in the opposite direction. A speed of 0 will stop the motor.
+        # realistically, this is only called directly to stop the motor.
+        # most of the time, the motor is controlled by move_distance, which uses the encoder to determine when to stop.
+        # in metric units.
         if speed > 0:
-            self.pin_1.duty_u16(int(speed / self.max_speed * 65535))
-            self.pin_2.duty_u16(0)
+            self.pin_1.duty_cycle = int(speed / self.max_speed * 65535)
+            self.pin_2.duty_cycle = 0
         elif speed < 0:
-            self.pin_1.duty_u16(0)
-            self.pin_2.duty_u16(int(-speed / self.max_speed * 65535))
+            self.pin_1.duty_cycle = 0
+            self.pin_2.duty_cycle = int(-speed / self.max_speed * 65535)
         else:
-            self.pin_1.duty_u16(65535)
-            self.pin_2.duty_u16(65535)
+            self.pin_1.duty_cycle = 65535
+            self.pin_2.duty_cycle = 65535
 
-    # sleeps the motor driver and takes inputs 0 (off) of 1 (on)
-    # sleep must be 1 for the motor to run.
     def sleep_motor(self, value):
-        self.sleep.value(value)
+        # sleeps the motor driver and takes inputs True (off) of False (on)
+        # sleep must be True for the motor to run.
+        self.sleep.value = value
 
     def get_sleep_state(self):
-        # returns the current state of the sleep pin. A value of 1 indicates that the motor driver is active, while a value of 0 indicates that it is in sleep mode.
-        return self.sleep.value()
+        # returns the current state of the sleep pin. True means the motor is asleep (off), and False means the motor is awake (on).
+        return self.sleep.value
 
-    def encoder_callback(self, pin):
-        # This function is called whenever the encoder detects a change in position.
-        # It updates the encoder counter based on the direction of rotation.
-        if self.enc_phase2.value() == 1:
-            self.enc_counter += 1
-        else:
-            self.enc_counter -= 1
+    def get_encoder_position(self):
+        # returns the current position of the encoder. This value can be used to determine how far the motor has moved.
+        return self.encoder.position
 
-    # returns the current value of the encoder counter. This value represents the number of pulses detected by the encoder since the last reset. It can be used to determine the position or distance traveled by the motor.
-    def get_encoder_count(self):
-        return self.enc_counter
-
-    # mag speed is from 0 to max_speed, and distance is in meters. Distance can be negative to move in the opposite direction.
-    def move_distance(self, distance, mag_speed):
-        # This function moves the motor a specified distance in meters.
-        # It calculates the number of pulses required to move the specified distance based on the circumference of the wheel and the number of pulses per revolution.
+    def move_distance(self, distance, speed):
+        # This function moves the motor a specified distance in meters (can be negative).
+        # speed is a magnitude value that determines how fast the motor should move. The speed parameter should be a float between 0 and max_speed. (m/s)
         pulses_needed = int((distance / self.circumference) * self.pulses_per_revolution)
-        self.enc_counter = 0  # Reset encoder counters
+        
+        # resets the encoder position to 0 before starting the movement.
+        self.encoder.position = 0
 
         if pulses_needed < 0:
-            mag_speed = -mag_speed  # Reverse direction if distance is negative
+            speed = -speed  # Reverse direction if distance is negative
         
-        # Set up the encoder interrupt to call the encoder_callback function whenever a rising edge is detected on enc_phase1.
-        self.enc_phase1.irq(trigger=Pin.IRQ_RISING, handler=self.encoder_callback)
+        # sets the motor speed.
+        self.set_speed(speed)
 
-        # Set the motor speed to the specified magnitude. The motor will continue to move until the desired number of pulses is reached.
-        self.set_speed(mag_speed)  # Set a constant speed for movement
-        
         # if this is terminated, the motor will stop and the encoder interrupt will be disabled.
         try:
             # Move the motor until the desired number of pulses is reached.
-            while abs(self.get_encoder_count()) < abs(pulses_needed):
+            while abs(self.get_encoder_position()) < abs(pulses_needed):
                 yield # This allows other tasks to run while waiting for the motor to reach the desired distance.
         finally:
             # Once the desired distance is reached, disable the encoder interrupt and stop the motor.
-            self.enc_phase1.irq(trigger=Pin.IRQ_RISING, handler=None)  # Disable the encoder interrupt
             self.set_speed(0)  # Stop the motor after reaching the desired distance
