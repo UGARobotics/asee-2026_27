@@ -9,8 +9,7 @@ class motor:
         pin1, 
         pin2, 
         enc_phase1, 
-        enc_phase2, 
-        sleep, 
+        enc_phase2,
         circumference, 
         max_speed,
         pulses_per_revolution=224.4,
@@ -27,10 +26,6 @@ class motor:
         # initializes the encoder pins.
         self.encoder = rotaryio.IncrementalEncoder(enc_phase2, enc_phase1)
         self.encoder.divisor = 1  # Set the encoder divider to 1 for full resolution
-        
-        # initializes the sleep pin.
-        self.sleep = digitalio.DigitalInOut(sleep)
-        self.sleep.direction = digitalio.Direction.OUTPUT
 
         # initializes the circumference of the wheel.
         self.circumference = circumference
@@ -55,11 +50,6 @@ class motor:
         else:
             self.pin_1.duty_cycle = 65535
             self.pin_2.duty_cycle = 65535
-
-    def sleep_motor(self, value):
-        # sleeps the motor driver and takes inputs True (off) of False (on)
-        # sleep must be True for the motor to run.
-        self.sleep.value = value
 
     def get_sleep_state(self):
         # returns the current state of the sleep pin. True means the motor is asleep (off), and False means the motor is awake (on).
