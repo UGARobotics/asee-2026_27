@@ -51,10 +51,6 @@ class motor:
             self.pin_1.duty_cycle = 65535
             self.pin_2.duty_cycle = 65535
 
-    def get_sleep_state(self):
-        # returns the current state of the sleep pin. True means the motor is asleep (off), and False means the motor is awake (on).
-        return self.sleep.value
-
     def get_encoder_position(self):
         # returns the current position of the encoder. This value can be used to determine how far the motor has moved.
         return self.encoder.position
