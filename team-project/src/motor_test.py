@@ -4,7 +4,7 @@ import board
 import pwmio
 
 def main():
-    my_motor = motor.Motor(27, 26, None, None, None, 251)
+    my_motor = motor.Motor(board.GP21, board.GP20, None, None, None, 251)
    
     while true:
         my_motor.set_speed(100)  # Set motor speed to 50%
