@@ -12,7 +12,7 @@ class motor:
         enc_phase2,
         circumference, 
         max_speed,
-        pulses_per_revolution=224.4,
+        pulses_per_revolution=16,
         freq=20000,
     ):
         # initializes the motor driver with frequency.
