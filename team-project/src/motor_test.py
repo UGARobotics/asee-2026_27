@@ -16,5 +16,5 @@ def main():
         my_motor.set_speed(0)  # Stop the motor
         time.sleep(1)  # Wait for 1 second
 
-if __name__ == "__main__":
+if __name__ == "__motor_test__":
     main()
