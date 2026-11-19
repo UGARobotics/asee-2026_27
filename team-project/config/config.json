@@ -1,0 +1,16 @@
+{
+    "drivetrain": {
+        "MAX_SPEED": 0,
+        "WHEEL_CIRCUMFERENCE": 0,
+        "PULSES_PER_REVOLUTION": 16,
+        "FREQUENCY": 20000,
+        "MOTOR_L_IN_1": 0,
+        "MOTOR_L_IN_2": 0,
+        "MOTOR_L_PHASE_A": 0,
+        "MOTOR_L_PHASE_B": 0,
+        "MOTOR_R_IN_1": 0,
+        "MOTOR_R_IN_2": 0,
+        "MOTOR_R_PHASE_A": 0,
+        "MOTOR_R_PHASE_B": 0
+    }
+}
